@@ -21,7 +21,7 @@ export default function LoginPage() {
     try {
       // Login with Directus
       await directus.request(
-        login(email, password)
+        login({ email, password })
       );
 
       // Redirect to dashboard
