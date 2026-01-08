@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { directus } from "@/lib/directus";
-import { createUser, login } from "@directus/sdk";
+import { login } from "@directus/sdk";
 import { isValidEmail, isValidSubdomain } from "@/lib/utils";
-import { CustomDirectusUser } from "@/lib/types";
+import { signupUser } from "./actions";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -42,17 +42,21 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // Create user in Directus
-      const userData: Partial<CustomDirectusUser> = {
-        email: formData.email,
-        password: formData.password,
-        first_name: formData.name,
-        subdomain: formData.subdomain.toLowerCase(),
-      };
+      console.log("Client: Starting signup...");
 
-      await directus.request(createUser(userData));
+      // Create user via server action (uses admin token)
+      const result = await signupUser(formData);
 
-      // Auto-login after signup
+      if (!result.success) {
+        console.error("Client: Signup failed:", result.error);
+        setError(result.error || "Signup failed");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Client: User created, logging in...");
+
+      // Login with regular client
       await directus.request(
         login({
           email: formData.email,
@@ -60,17 +64,15 @@ export default function SignupPage() {
         })
       );
 
+      console.log("Client: Login successful, redirecting...");
+
       // Redirect to dashboard
       router.push("/dashboard");
       router.refresh();
-    } catch (err: any) {
-      if (err.message?.includes("subdomain")) {
-        setError("This subdomain is already taken");
-      } else if (err.message?.includes("email")) {
-        setError("This email is already registered");
-      } else {
-        setError(err.message || "Failed to create account");
-      }
+    } catch (err) {
+      console.error("Client: Error:", err);
+      const errorMessage = err instanceof Error ? err.message : "An error occurred. Please try again.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -110,7 +112,7 @@ export default function SignupPage() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 text-gray-900 bg-white"
                 placeholder="John Doe"
               />
             </div>
@@ -127,7 +129,7 @@ export default function SignupPage() {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 text-gray-900 bg-white"
                 placeholder="you@example.com"
               />
             </div>
@@ -144,7 +146,7 @@ export default function SignupPage() {
                 required
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 text-gray-900 bg-white"
                 placeholder="••••••••"
               />
               <p className="mt-1 text-xs text-gray-500">At least 8 characters</p>
@@ -164,7 +166,7 @@ export default function SignupPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, subdomain: e.target.value.toLowerCase() })
                   }
-                  className="block w-full rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                  className="block w-full rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500 text-gray-900 bg-white"
                   placeholder="yourname"
                 />
                 <span className="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
