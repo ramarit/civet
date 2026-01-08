@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { directus } from "./directus";
-import { readMe, readItems } from "@directus/sdk";
+import { readMe } from "@directus/sdk";
 import type { User } from "./types";
 
 const AUTH_COOKIE_NAME = "directus_token";
@@ -22,9 +22,18 @@ export async function getCurrentUser(): Promise<User | null> {
     directus.setToken(token);
 
     // Get current user from Directus
-    const user = await directus.request(readMe());
+    const directusUser = await directus.request(readMe());
 
-    return user as User;
+    // Map Directus user to our application User type
+    const user: User = {
+      id: directusUser.id,
+      email: directusUser.email || "",
+      name: directusUser.first_name || "",
+      subdomain: (directusUser as any).subdomain || "",
+      created_at: (directusUser as any).date_created || new Date().toISOString(),
+    };
+
+    return user;
   } catch (error) {
     console.error("Error getting current user:", error);
     return null;

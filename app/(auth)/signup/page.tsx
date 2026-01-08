@@ -6,6 +6,7 @@ import Link from "next/link";
 import { directus } from "@/lib/directus";
 import { createUser, login } from "@directus/sdk";
 import { isValidEmail, isValidSubdomain } from "@/lib/utils";
+import { CustomDirectusUser } from "@/lib/types";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -42,18 +43,21 @@ export default function SignupPage() {
 
     try {
       // Create user in Directus
-      await directus.request(
-        createUser({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-          subdomain: formData.subdomain.toLowerCase(),
-        })
-      );
+      const userData: Partial<CustomDirectusUser> = {
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.name,
+        subdomain: formData.subdomain.toLowerCase(),
+      };
+
+      await directus.request(createUser(userData));
 
       // Auto-login after signup
       await directus.request(
-        login(formData.email, formData.password)
+        login({
+          email: formData.email,
+          password: formData.password,
+        })
       );
 
       // Redirect to dashboard

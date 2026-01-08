@@ -1,5 +1,14 @@
 // Civet TypeScript Type Definitions
 
+import { DirectusUser } from '@directus/sdk';
+
+// Extend Directus User type with custom fields
+export interface CustomDirectusUser extends DirectusUser {
+  subdomain: string;
+  // Add any other custom fields you added to directus_users
+}
+
+// Application User type (for use in the app)
 export interface User {
   id: string;
   email: string;
