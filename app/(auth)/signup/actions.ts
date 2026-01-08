@@ -42,16 +42,16 @@ export async function signupUser(data: SignupData): Promise<SignupResult> {
     console.log('Server: User role found:', userRoleId);
 
     // Create user with admin privileges (bypasses all permissions)
-    const newUser = await directusAdmin.request(
-      createUser<CustomDirectusUser>({
-        email: data.email,
-        password: data.password,
-        first_name: data.name,
-        subdomain: data.subdomain.toLowerCase(),
-        role: userRoleId,
-        status: 'active', // Activate immediately
-      })
-    );
+    const userData: Partial<CustomDirectusUser> = {
+      email: data.email,
+      password: data.password,
+      first_name: data.name,
+      subdomain: data.subdomain.toLowerCase(),
+      role: userRoleId,
+      status: 'active', // Activate immediately
+    };
+
+    const newUser = await directusAdmin.request(createUser(userData));
 
     console.log('Server: User created successfully:', newUser.id);
 
