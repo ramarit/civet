@@ -1,9 +1,6 @@
-import { getCurrentUser } from "@/lib/auth";
 import Link from "next/link";
 
 export default async function PagesListPage() {
-  const user = await getCurrentUser();
-
   // TODO: Fetch pages from Directus
   const pages: any[] = [];
 
@@ -89,7 +86,7 @@ export default async function PagesListPage() {
                       Edit
                     </Link>
                     <a
-                      href={`/${user?.subdomain}`}
+                      href={`https://${page.subdomain}.getcivet.com`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-gray-900"

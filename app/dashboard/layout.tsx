@@ -78,15 +78,13 @@ export default async function DashboardLayout({
                   Welcome back, {user.name.split(" ")[0]}
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  Your landing page:{" "}
-                  <a
-                    href={`/${user.subdomain}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  Manage your{" "}
+                  <Link
+                    href="/dashboard/pages"
                     className="text-blue-600 hover:underline"
                   >
-                    getcivet.com/{user.subdomain}
-                  </a>
+                    landing pages
+                  </Link>
                 </p>
               </div>
             </div>
