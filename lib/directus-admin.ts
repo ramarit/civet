@@ -1,7 +1,6 @@
-import { createDirectus, rest, staticToken } from '@directus/sdk';
+import { createDirectus, rest, authentication } from '@directus/sdk';
 import { CustomDirectusUser, Page, Form, Lead, Note, Email } from './types';
 
-// Define schema
 type DirectusSchema = {
   directus_users: CustomDirectusUser[];
   pages: Page[];
@@ -11,9 +10,35 @@ type DirectusSchema = {
   emails: Email[];
 };
 
-// Admin client with static token (server-side only)
-export const directusAdmin = createDirectus<DirectusSchema>(
-  process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8055'
-)
+const directusUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8055';
+
+// Create admin client with email/password authentication
+export const directusAdmin = createDirectus<DirectusSchema>(directusUrl)
   .with(rest())
-  .with(staticToken(process.env.DIRECTUS_ADMIN_TOKEN || ''));
+  .with(authentication('json'));
+
+// Admin credentials
+const ADMIN_EMAIL = process.env.DIRECTUS_ADMIN_EMAIL || '';
+const ADMIN_PASSWORD = process.env.DIRECTUS_ADMIN_PASSWORD || '';
+
+// Login function
+let adminLoginPromise: Promise<void> | null = null;
+
+export async function loginAsAdmin() {
+  if (!adminLoginPromise) {
+    adminLoginPromise = (async () => {
+      try {
+        await directusAdmin.login({
+          email: ADMIN_EMAIL,
+          password: ADMIN_PASSWORD,
+        });
+        console.log('Admin logged in successfully');
+      } catch (error) {
+        console.error('Admin login failed:', error);
+        adminLoginPromise = null; // Reset so it can retry
+        throw error;
+      }
+    })();
+  }
+  return adminLoginPromise;
+}
