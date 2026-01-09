@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { directus } from "@/lib/directus";
 import { login } from "@directus/sdk";
-import { isValidEmail, isValidSubdomain } from "@/lib/utils";
+import { isValidEmail } from "@/lib/utils";
 import { signupUser } from "./actions";
 
 export default function SignupPage() {
@@ -14,7 +14,6 @@ export default function SignupPage() {
     name: "",
     email: "",
     password: "",
-    subdomain: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,11 +30,6 @@ export default function SignupPage() {
 
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters");
-      return;
-    }
-
-    if (!isValidSubdomain(formData.subdomain)) {
-      setError("Subdomain must be 3-63 characters, lowercase letters, numbers, and hyphens only");
       return;
     }
 
@@ -150,32 +144,6 @@ export default function SignupPage() {
                 placeholder="••••••••"
               />
               <p className="mt-1 text-xs text-gray-500">At least 8 characters</p>
-            </div>
-
-            <div>
-              <label htmlFor="subdomain" className="block text-sm font-medium text-gray-700">
-                Your Subdomain
-              </label>
-              <div className="mt-1 flex rounded-md shadow-sm">
-                <input
-                  id="subdomain"
-                  name="subdomain"
-                  type="text"
-                  required
-                  value={formData.subdomain}
-                  onChange={(e) =>
-                    setFormData({ ...formData, subdomain: e.target.value.toLowerCase() })
-                  }
-                  className="block w-full rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500 text-gray-900 bg-white"
-                  placeholder="yourname"
-                />
-                <span className="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
-                  .getcivet.com
-                </span>
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                This will be your landing page URL
-              </p>
             </div>
           </div>
 

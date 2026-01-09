@@ -1,14 +1,12 @@
 'use server';
 
 import { directusAdmin, loginAsAdmin } from '@/lib/directus-admin';
-import { createUser, readRoles } from '@directus/sdk';
-import { CustomDirectusUser } from '@/lib/types';
+import { readRoles } from '@directus/sdk';
 
 interface SignupData {
   email: string;
   password: string;
   name: string;
-  subdomain: string;
 }
 
 interface SignupResult {
@@ -46,18 +44,34 @@ export async function signupUser(data: SignupData): Promise<SignupResult> {
 
     console.log('Server: User role found:', userRoleId);
 
-    // Create user with admin privileges
+    // Create user with admin privileges using fetch directly
     console.log('Server: Creating user...');
-    const userData: Partial<CustomDirectusUser> = {
-      email: data.email,
-      password: data.password,
-      first_name: data.name,
-      subdomain: data.subdomain.toLowerCase(),
-      role: userRoleId,
-      status: 'active',
-    };
 
-    const newUser = await directusAdmin.request(createUser(userData));
+    const directusUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8055';
+    const token = await directusAdmin.getToken();
+
+    const response = await fetch(`${directusUrl}/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password,
+        first_name: data.name,
+        role: userRoleId,
+        status: 'active',
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw errorData;
+    }
+
+    const result = await response.json() as { data: { id: string; email: string } };
+    const newUser = result.data;
 
     console.log('Server: User created successfully:', newUser.id);
 
@@ -76,14 +90,6 @@ export async function signupUser(data: SignupData): Promise<SignupResult> {
 
     const errorMessage = directusError?.errors?.[0]?.message || (error instanceof Error ? error.message : '') || '';
 
-    // Duplicate subdomain
-    if (errorMessage.includes('subdomain') || errorMessage.includes('unique')) {
-      return {
-        success: false,
-        error: 'This subdomain is already taken. Please choose another.'
-      };
-    }
-
     // Duplicate email
     if (errorMessage.includes('email')) {
       return {
@@ -95,7 +101,7 @@ export async function signupUser(data: SignupData): Promise<SignupResult> {
     // Generic error
     return {
       success: false,
-      error: 'Signup failed. Please try again.'
+      error: `Signup failed: ${errorMessage || 'Please try again.'}`
     };
   }
 }

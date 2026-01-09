@@ -29,7 +29,6 @@ export async function getCurrentUser(): Promise<User | null> {
       id: directusUser.id,
       email: directusUser.email || "",
       name: directusUser.first_name || "",
-      subdomain: (directusUser as any).subdomain || "",
       created_at: (directusUser as any).date_created || new Date().toISOString(),
     };
 
