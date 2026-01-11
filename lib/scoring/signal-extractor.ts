@@ -82,36 +82,57 @@ function extractFieldSignal(
 
 /**
  * Infer signal type from field properties (heuristics)
+ *
+ * This is the "zero-config" magic - we detect intent from how users
+ * naturally name their form fields.
  */
 function inferSignalType(field: FormField): Signal["type"] | null {
   const label = field.label.toLowerCase();
   const id = field.id.toLowerCase();
+  const combined = `${label} ${id}`;
 
-  // Budget indicators
-  if (label.includes("budget") || id.includes("budget") ||
-      label.includes("investment") || id.includes("price")) {
+  // Budget indicators (expanded patterns)
+  const budgetPatterns = [
+    "budget", "cost", "price", "pricing", "investment", "spend",
+    "afford", "pay", "payment", "quote", "estimate", "fee", "rate",
+    "much", "how much", "what's your budget", "budget range"
+  ];
+  if (budgetPatterns.some(p => combined.includes(p))) {
     return "budget";
   }
 
-  // Urgency indicators
-  if (label.includes("timeline") || label.includes("urgency") ||
-      label.includes("when") || id.includes("timeline") ||
-      label.includes("start")) {
+  // Urgency/Timeline indicators (expanded patterns)
+  const urgencyPatterns = [
+    "timeline", "urgency", "urgent", "when", "timeframe", "time frame",
+    "start", "begin", "launch", "deadline", "asap", "schedule",
+    "how soon", "when do you need", "when would you like"
+  ];
+  if (urgencyPatterns.some(p => combined.includes(p))) {
     return "urgency";
   }
 
-  // Service indicators
-  if (label.includes("service") || label.includes("interested in") ||
-      label.includes("need help with") || id.includes("service")) {
+  // Service/Need indicators (expanded patterns)
+  const servicePatterns = [
+    "service", "services", "interested in", "interest", "looking for",
+    "need help with", "need", "require", "want", "type of",
+    "which service", "what service", "help with", "project type"
+  ];
+  if (servicePatterns.some(p => combined.includes(p))) {
     return "service";
   }
 
-  // Source indicators
-  if (label.includes("hear about") || label.includes("referral") ||
-      id.includes("source") || id.includes("utm")) {
+  // Source/Referral indicators (expanded patterns)
+  const sourcePatterns = [
+    "hear about", "heard about", "find us", "found us", "referral",
+    "referred by", "source", "how did you", "where did you",
+    "learn about", "discover", "utm", "came from"
+  ];
+  if (sourcePatterns.some(p => combined.includes(p))) {
     return "source";
   }
 
+  // If we can't detect a specific type, return "other"
+  // These will get neutral weight (5 pts) - safe default
   return "other";
 }
 
@@ -376,4 +397,53 @@ function formatValue(value: any): string {
     return value.length > 50 ? value.substring(0, 50) + "..." : value;
   }
   return String(value);
+}
+
+/**
+ * Analyze form fields to show what signals can be detected
+ * Useful for debugging and user feedback
+ */
+export function analyzeFormSignals(form: Form): {
+  detectedFields: Array<{ fieldId: string; fieldLabel: string; signalType: Signal["type"] }>;
+  undetectedFields: Array<{ fieldId: string; fieldLabel: string }>;
+  totalFields: number;
+  detectionRate: number;
+} {
+  const allFields = form.steps.flatMap((step) => step.fields);
+  const detectedFields: Array<{ fieldId: string; fieldLabel: string; signalType: Signal["type"] }> = [];
+  const undetectedFields: Array<{ fieldId: string; fieldLabel: string }> = [];
+
+  for (const field of allFields) {
+    const signalType = field.signal_type || inferSignalType(field);
+
+    if (signalType && signalType !== "other") {
+      detectedFields.push({
+        fieldId: field.id,
+        fieldLabel: field.label,
+        signalType,
+      });
+    } else {
+      // Contact info fields (name, email, phone) are expected to not have signals
+      const isContactField = ["name", "email", "phone", "message"].some(
+        (type) => field.id.toLowerCase().includes(type) || field.label.toLowerCase().includes(type)
+      );
+
+      if (!isContactField) {
+        undetectedFields.push({
+          fieldId: field.id,
+          fieldLabel: field.label,
+        });
+      }
+    }
+  }
+
+  const totalFields = allFields.length;
+  const detectionRate = totalFields > 0 ? (detectedFields.length / totalFields) * 100 : 0;
+
+  return {
+    detectedFields,
+    undetectedFields,
+    totalFields,
+    detectionRate: Math.round(detectionRate),
+  };
 }
