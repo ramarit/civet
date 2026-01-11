@@ -48,7 +48,7 @@ export default async function LeadsListPage() {
               Sort By
             </label>
             <select className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500">
-              <option value="created_at">Newest First</option>
+              <option value="date_created">Newest First</option>
               <option value="score">Highest Score</option>
               <option value="status">Status</option>
             </select>
@@ -131,7 +131,7 @@ export default async function LeadsListPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(lead.created_at).toLocaleDateString()}
+                    {new Date(lead.date_created).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link

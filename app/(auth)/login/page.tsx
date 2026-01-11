@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { directus } from "@/lib/directus";
-import { login } from "@directus/sdk";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,10 +17,20 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Login with Directus
-      await directus.request(
-        login({ email, password })
-      );
+      // Login via API route
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Invalid email or password");
+      }
 
       // Redirect to dashboard
       router.push("/dashboard");

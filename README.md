@@ -113,17 +113,18 @@ CORS_ORIGIN=true
 - **password**: Hash (required, hidden)
 - **name**: String (required)
 - **subdomain**: String (unique, required)
-- **created_at**: Timestamp (auto-generated)
+- **date_created**: Timestamp (auto-generated)
 
 #### Collection: pages
 - **id**: UUID (Primary Key)
 - **user_id**: UUID (Many-to-One relationship to users)
+- **subdomain**: String (unique, required)
 - **headline**: String (required)
 - **description**: Text (required)
 - **cta_text**: String (default: "Get Started")
 - **form_id**: UUID (Many-to-One relationship to forms)
 - **published**: Boolean (default: false)
-- **created_at**: Timestamp
+- **date_created**: Timestamp
 
 #### Collection: forms
 - **id**: UUID (Primary Key)
@@ -131,7 +132,7 @@ CORS_ORIGIN=true
 - **name**: String (required)
 - **steps**: JSON (required)
 - **scoring_rules**: JSON
-- **created_at**: Timestamp
+- **date_created**: Timestamp
 
 #### Collection: leads
 - **id**: UUID (Primary Key)
@@ -141,14 +142,15 @@ CORS_ORIGIN=true
 - **responses**: JSON (required)
 - **score**: Integer (default: 0)
 - **status**: String (default: "new")
-- **created_at**: Timestamp
+- **date_created**: Timestamp
+- **date_updated**: Timestamp
 
 #### Collection: notes
 - **id**: UUID (Primary Key)
 - **lead_id**: UUID (Many-to-One relationship to leads)
 - **user_id**: UUID (Many-to-One relationship to users)
 - **content**: Text (required)
-- **created_at**: Timestamp
+- **date_created**: Timestamp
 
 #### Collection: emails
 - **id**: UUID (Primary Key)
@@ -225,6 +227,32 @@ npm run dev
 4. Create a form in the dashboard
 5. Create a landing page
 6. Visit `http://localhost:3000/your-subdomain` to see your public page
+
+### Seed Mock Data for Inbox
+
+To test the Inbox feature with realistic mock data:
+
+```bash
+# Seed 15 mock messages (6 unread, 3 contacted, 2 qualified, 4 archived)
+npm run seed:inbox
+```
+
+This will:
+- Create realistic contact inquiries with names, emails, phone numbers, and messages
+- Backdate timestamps for a realistic timeline (5 min ago to 4 weeks ago)
+- Include edge cases (long names, no names, long messages)
+- Automatically create a test page and form if needed
+
+To clean up the mock data:
+
+```bash
+# Delete all messages for the test user
+npm run clean:inbox
+```
+
+**Note**: The seed script requires admin credentials in your `.env.local`:
+- `DIRECTUS_ADMIN_EMAIL`
+- `DIRECTUS_ADMIN_PASSWORD`
 
 ## Project Structure
 

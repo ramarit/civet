@@ -76,7 +76,7 @@ export default async function PagesListPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(page.created_at).toLocaleDateString()}
+                    {new Date(page.date_created).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link

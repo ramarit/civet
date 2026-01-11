@@ -200,7 +200,7 @@ export default function LeadDetailPage() {
                     <div key={note.id} className="border-b border-gray-200 pb-3">
                       <p className="text-sm text-gray-900">{note.content}</p>
                       <p className="text-xs text-gray-500 mt-1">
-                        {new Date(note.created_at).toLocaleString()}
+                        {new Date(note.date_created).toLocaleString()}
                       </p>
                     </div>
                   ))}
