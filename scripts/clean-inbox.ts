@@ -42,7 +42,7 @@ async function cleanInbox() {
         },
         limit: 1
       })
-    );
+    ) as Array<{ id: string; email: string }>;
 
     if (!users || users.length === 0) {
       console.error("❌ No non-admin users found.");
@@ -60,7 +60,7 @@ async function cleanInbox() {
           user_id: { _eq: userId }
         }
       })
-    );
+    ) as Array<{ id: string }>;
 
     if (!messages || messages.length === 0) {
       console.log("ℹ️  No messages found to delete");

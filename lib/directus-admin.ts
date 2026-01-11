@@ -36,6 +36,7 @@ function getDirectusAdmin(): DirectusAdminClient {
 export const directusAdmin = {
   request: (...args: Parameters<DirectusAdminClient['request']>) =>
     getDirectusAdmin().request(...args),
+  getToken: () => getDirectusAdmin().getToken(),
 };
 
 // Login function

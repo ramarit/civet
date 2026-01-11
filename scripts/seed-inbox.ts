@@ -138,7 +138,7 @@ async function seedInbox() {
         },
         limit: 1
       })
-    );
+    ) as Array<{ id: string; email: string }>;
 
     if (!users || users.length === 0) {
       console.error("❌ No non-admin users found.");
@@ -159,7 +159,7 @@ async function seedInbox() {
         },
         limit: 1
       })
-    );
+    ) as Array<{ id: string; headline: string; form_id?: string }>;
 
     let page;
     let form;
@@ -206,7 +206,7 @@ async function seedInbox() {
           ],
           scoring_rules: []
         })
-      );
+      ) as { id: string };
 
       // Create test page (without subdomain - it's not in the actual Directus schema)
       page = await directusAdmin.request(
@@ -218,7 +218,7 @@ async function seedInbox() {
           form_id: form.id,
           published: true
         })
-      );
+      ) as { id: string; headline: string };
 
       console.log(`✅ Created test page: ${page.headline}`);
     } else {
@@ -234,7 +234,7 @@ async function seedInbox() {
             },
             limit: 1
           })
-        );
+        ) as Array<{ id: string }>;
         form = forms[0];
       }
 
@@ -278,7 +278,7 @@ async function seedInbox() {
             ],
             scoring_rules: []
           })
-        );
+        ) as { id: string };
       }
     }
 
@@ -308,7 +308,7 @@ async function seedInbox() {
           phone: mockPhones[config.nameIndex] || undefined,
           message: mockMessages[config.messageIndex]
         },
-        status: config.status,
+        status: config.status as "new" | "contacted" | "qualified" | "closed",
         score: 0,
         date_created: getBackdatedTimestamp(config.offset)
       };
