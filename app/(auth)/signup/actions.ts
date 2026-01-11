@@ -30,7 +30,7 @@ export async function signupUser(data: SignupData): Promise<SignupResult> {
         filter: { name: { _eq: 'User' } },
         limit: 1,
       })
-    );
+    ) as Array<{ id: string; name: string }>;
 
     const userRoleId = roles[0]?.id;
 

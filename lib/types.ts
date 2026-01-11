@@ -12,7 +12,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  created_at: string;
+  date_created: string;
 }
 
 export interface Page {
@@ -24,7 +24,7 @@ export interface Page {
   cta_text: string;
   form_id: string;
   published: boolean;
-  created_at: string;
+  date_created: string;
 }
 
 export interface FormField {
@@ -55,7 +55,7 @@ export interface Form {
   name: string;
   steps: FormStep[];
   scoring_rules: ScoringRule[];
-  created_at: string;
+  date_created: string;
 }
 
 export interface Lead {
@@ -66,7 +66,8 @@ export interface Lead {
   responses: Record<string, any>;
   score: number;
   status: "new" | "contacted" | "qualified" | "closed";
-  created_at: string;
+  date_created: string;
+  date_updated?: string;
 }
 
 export interface Note {
@@ -74,7 +75,7 @@ export interface Note {
   lead_id: string;
   user_id: string;
   content: string;
-  created_at: string;
+  date_created: string;
 }
 
 export interface Email {

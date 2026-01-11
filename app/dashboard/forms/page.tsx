@@ -71,7 +71,7 @@ export default async function FormsListPage() {
                     {form.steps?.length || 0} steps
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(form.created_at).toLocaleDateString()}
+                    {new Date(form.date_created).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link
