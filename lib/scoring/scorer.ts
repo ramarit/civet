@@ -15,6 +15,7 @@
 
 import type { Lead, Form, Signal, DisqualifierRule, ScoringRule } from "@/lib/types";
 import { extractSignals } from "./signal-extractor";
+import { getIntentLevel } from "./intent-detector";
 
 export interface ScoringResult {
   score: number;
@@ -56,7 +57,9 @@ export function scoreLead(
   const finalScore = Math.min(100, baseScore + rulesScore);
 
   // Step 6: Determine priority bucket based on intent level and score
-  const priority = determinePriority(finalScore, form.intent_level);
+  // Use auto-detection if intent_level not explicitly set
+  const intentLevel = getIntentLevel(form.intent_level, form.name);
+  const priority = determinePriority(finalScore, intentLevel);
 
   return {
     score: Math.round(finalScore),

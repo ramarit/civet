@@ -61,10 +61,10 @@ export interface Form {
   id: string;
   user_id: string;
   name: string;
-  intent_level: "low" | "medium" | "high"; // NEW: Form intent level
+  intent_level?: "low" | "medium" | "high"; // OPTIONAL: Auto-detected if not set
   steps: FormStep[];
-  scoring_rules: ScoringRule[];
-  disqualifiers: DisqualifierRule[]; // NEW: Auto-disqualification rules
+  scoring_rules?: ScoringRule[]; // OPTIONAL: Works without custom rules
+  disqualifiers?: DisqualifierRule[]; // OPTIONAL: Auto-disqualification rules
   date_created: string;
 }
 

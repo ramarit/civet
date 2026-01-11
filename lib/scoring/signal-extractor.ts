@@ -146,32 +146,57 @@ function getSignalWeight(type: Signal["type"], value: any): number {
 
 /**
  * Calculate budget signal weight (0-20 points)
+ *
+ * CONSERVATIVE APPROACH: We extract the presence/type of budget signal,
+ * but don't assume what's "high" or "low" value for this business.
+ *
+ * Instead, we weight based on:
+ * 1. Signal clarity (specific number vs vague)
+ * 2. Qualitative intent indicators (flexible, limited, etc.)
+ * 3. Let the scoring rules handle business-specific thresholds
  */
 function calculateBudgetWeight(value: any): number {
   if (typeof value === "number") {
-    // Numeric budget
-    if (value >= 50000) return 20;
-    if (value >= 20000) return 15;
-    if (value >= 10000) return 10;
-    if (value >= 5000) return 5;
+    // Specific numeric budget provided = high signal quality
+    // Weight by magnitude (log scale to avoid bias)
+    if (value > 0) {
+      // More specific = more weight, but capped to avoid assumptions
+      return Math.min(20, Math.log10(value + 1) * 4);
+    }
     return 2;
   }
 
   if (typeof value === "string") {
     const lower = value.toLowerCase();
 
-    // Budget ranges
-    if (lower.includes("50k") || lower.includes("50,000") || lower.includes("enterprise")) return 20;
-    if (lower.includes("20k") || lower.includes("20,000")) return 15;
-    if (lower.includes("10k") || lower.includes("10,000")) return 10;
-    if (lower.includes("5k") || lower.includes("5,000")) return 5;
+    // Qualitative indicators (universal across businesses)
+    if (lower.includes("flexible") || lower.includes("open") ||
+        lower.includes("negotiable")) {
+      return 15; // Good signal: willing to invest
+    }
 
-    // Qualitative indicators
-    if (lower.includes("flexible") || lower.includes("open")) return 12;
-    if (lower.includes("limited") || lower.includes("tight")) return 3;
+    if (lower.includes("limited") || lower.includes("tight") ||
+        lower.includes("minimal") || lower.includes("low")) {
+      return 3; // Weak signal: budget constraint
+    }
+
+    // Contains numeric mention (parse it)
+    const numMatch = lower.match(/\$?(\d+)[k,]?/);
+    if (numMatch) {
+      const num = parseInt(numMatch[1]);
+      if (num > 0) {
+        // Mentioned specific number = good signal quality
+        return Math.min(20, Math.log10((num * 1000) + 1) * 4);
+      }
+    }
+
+    // Mentioned budget but unclear = medium signal
+    if (lower.includes("budget") || lower.includes("investment")) {
+      return 8;
+    }
   }
 
-  return 5; // Default for unclear budget
+  return 5; // Default for any budget response
 }
 
 /**
