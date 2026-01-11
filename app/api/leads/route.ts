@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { directus } from "@/lib/directus";
-import { createItem, readItems } from "@directus/sdk";
-import { calculateLeadScore } from "@/lib/utils";
+import { createItem, readItems, readItem } from "@directus/sdk";
+import { scoreLead } from "@/lib/scoring/scorer";
+import type { Form } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,17 +16,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Get user by subdomain
-    // TODO: Get page and form by user_id
-    // TODO: Calculate lead score based on form's scoring_rules
-    // TODO: Create lead in Directus
-
-    /*
-    Example implementation:
-
     // 1. Find user by subdomain
     const users = await directus.request(
-      readItems("users", {
+      readItems("directus_users", {
         filter: { subdomain: { _eq: subdomain } },
         limit: 1,
       })
@@ -63,28 +56,33 @@ export async function POST(request: NextRequest) {
     // 3. Get the form
     const form = await directus.request(
       readItem("forms", page.form_id)
-    );
+    ) as Form;
 
-    // 4. Calculate lead score
-    const score = calculateLeadScore(responses, form.scoring_rules || []);
+    // 4. Score the lead using new scoring system
+    const scoringResult = scoreLead(responses, form);
 
-    // 5. Create lead
+    // 5. Create lead with scoring data
     const lead = await directus.request(
       createItem("leads", {
         user_id: user.id,
         page_id: page.id,
         form_id: form.id,
         responses,
-        score,
-        status: "new",
+        signals: scoringResult.signals,
+        score: scoringResult.score,
+        priority: scoringResult.priority,
+        disqualified: scoringResult.disqualified,
+        disqualified_reason: scoringResult.disqualified_reason,
+        status: "new", // Keep for backward compatibility
       })
     );
 
-    return NextResponse.json({ success: true, lead_id: lead.id });
-    */
-
-    // Placeholder response
-    return NextResponse.json({ success: true, message: "Lead submitted successfully" });
+    return NextResponse.json({
+      success: true,
+      lead_id: lead.id,
+      score: scoringResult.score,
+      priority: scoringResult.priority,
+    });
   } catch (error) {
     console.error("Error creating lead:", error);
     return NextResponse.json(
@@ -99,7 +97,7 @@ export async function GET(request: NextRequest) {
   // Requires authentication
   try {
     // TODO: Get user from session
-    // TODO: Fetch leads for the user
+    // TODO: Fetch leads for the user with form grouping
 
     return NextResponse.json({ leads: [] });
   } catch (error) {
