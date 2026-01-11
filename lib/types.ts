@@ -34,6 +34,7 @@ export interface FormField {
   placeholder?: string;
   required: boolean;
   options?: string[];
+  signal_type?: "budget" | "urgency" | "service" | "source" | "other"; // Signal metadata for scoring
 }
 
 export interface FormStep {
@@ -49,13 +50,31 @@ export interface ScoringRule {
   points: number;
 }
 
+export interface DisqualifierRule {
+  field: string;
+  operator: "equals" | "contains" | "less_than";
+  value: string | number;
+  reason: string;
+}
+
 export interface Form {
   id: string;
   user_id: string;
   name: string;
+  intent_level: "low" | "medium" | "high"; // NEW: Form intent level
   steps: FormStep[];
   scoring_rules: ScoringRule[];
+  disqualifiers: DisqualifierRule[]; // NEW: Auto-disqualification rules
   date_created: string;
+}
+
+// Signal extracted from lead responses for scoring
+export interface Signal {
+  type: "budget" | "urgency" | "service" | "source" | "completion" | "contact_quality" | "other";
+  field?: string;
+  value: any;
+  weight: number;
+  description?: string;
 }
 
 export interface Lead {
@@ -64,8 +83,13 @@ export interface Lead {
   page_id: string;
   form_id: string;
   responses: Record<string, any>;
-  score: number;
-  status: "new" | "contacted" | "qualified" | "closed";
+  signals: Signal[]; // NEW: Extracted signals for transparency
+  score: number; // Calculated from signals
+  priority: "high" | "medium" | "low"; // NEW: Priority bucket (replaces status for v1)
+  disqualified: boolean; // NEW: Manual or auto-disqualified
+  disqualified_reason?: string; // NEW: Why it was disqualified
+  ai_summary?: string; // NEW: AI explanation of priority
+  status: "new" | "contacted" | "qualified" | "closed"; // Keep for now, will deprecate
   date_created: string;
   date_updated?: string;
 }
