@@ -1,11 +1,15 @@
 import { getCurrentUser } from "@/lib/auth";
 import { directus } from "@/lib/directus";
 import { readItems } from "@directus/sdk";
-import type { Lead, Page } from "@/lib/types";
+import type { Lead, Page, Form } from "@/lib/types";
 import Link from "next/link";
 import { InboxIcon } from "@heroicons/react/24/outline";
-import InboxTabs from "@/components/InboxTabs";
+import FormGroupedInbox from "@/components/FormGroupedInbox";
 import { cookies } from "next/headers";
+
+interface LeadWithForm extends Lead {
+  form: Form;
+}
 
 export default async function InboxPage() {
   const user = await getCurrentUser();
@@ -34,19 +38,26 @@ export default async function InboxPage() {
     directus.setToken(token);
   }
 
-  // Fetch messages with error handling
-  let messages: Lead[] = [];
+  // Fetch leads with their associated forms
+  let leads: LeadWithForm[] = [];
   let pages: Page[] = [];
 
   try {
-    messages = (await directus.request(
+    const rawLeads = (await directus.request(
       readItems("leads", {
         filter: { user_id: { _eq: userId } },
+        fields: ["*", "form_id.*"], // Include all lead fields and all form fields
         sort: ["-date_created"],
       })
-    )) as Lead[];
+    )) as any[];
+
+    // Map to proper type structure
+    leads = rawLeads.map((lead) => ({
+      ...lead,
+      form: lead.form_id, // Directus returns nested object as form_id
+    })) as LeadWithForm[];
   } catch (error) {
-    console.error("Error fetching messages:", error);
+    console.error("Error fetching leads:", error);
   }
 
   try {
@@ -59,7 +70,7 @@ export default async function InboxPage() {
     console.error("Error fetching pages:", error);
   }
 
-  // Create a page lookup map and convert to plain object for client component
+  // Create a page lookup map
   const pageNames: Record<string, string> = {};
   pages.forEach((page) => {
     pageNames[page.id] = page.headline || "Unknown Page";
@@ -72,17 +83,17 @@ export default async function InboxPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Inbox</h1>
           <p className="mt-2 text-gray-600">
-            Manage inquiries from your landing pages
+            Leads grouped by form, sorted by priority
           </p>
         </div>
       </div>
 
-      {/* Messages List with Tabs */}
-      {messages.length === 0 ? (
+      {/* Leads List */}
+      {leads.length === 0 ? (
         <div className="bg-white rounded-lg shadow text-center py-12">
           <InboxIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">
-            No messages yet
+            No leads yet
           </h3>
           <p className="mt-1 text-sm text-gray-500">
             Create a page to start receiving inquiries!
@@ -97,7 +108,7 @@ export default async function InboxPage() {
           </div>
         </div>
       ) : (
-        <InboxTabs messages={messages} pageNames={pageNames} />
+        <FormGroupedInbox leads={leads} pageNames={pageNames} />
       )}
     </div>
   );
