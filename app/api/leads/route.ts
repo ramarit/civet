@@ -16,28 +16,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Find user by subdomain
-    const users = await directus.request(
-      readItems("directus_users", {
-        filter: { subdomain: { _eq: subdomain } },
-        limit: 1,
-      })
-    );
-
-    if (users.length === 0) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    const user = users[0];
-
-    // 2. Get user's published page
+    // 1. Find published page by subdomain
     const pages = await directus.request(
       readItems("pages", {
         filter: {
-          user_id: { _eq: user.id },
+          subdomain: { _eq: subdomain },
           published: { _eq: true },
         },
         limit: 1,
@@ -46,25 +29,25 @@ export async function POST(request: NextRequest) {
 
     if (pages.length === 0) {
       return NextResponse.json(
-        { error: "No published page found" },
+        { error: "Page not found or not published" },
         { status: 404 }
       );
     }
 
     const page = pages[0];
 
-    // 3. Get the form
+    // 2. Get the form
     const form = await directus.request(
       readItem("forms", page.form_id)
     ) as Form;
 
-    // 4. Score the lead using new scoring system
+    // 3. Score the lead using new scoring system
     const scoringResult = scoreLead(responses, form);
 
-    // 5. Create lead with scoring data
+    // 4. Create lead with scoring data
     const lead = await directus.request(
       createItem("leads", {
-        user_id: user.id,
+        user_id: page.user_id,
         page_id: page.id,
         form_id: form.id,
         responses,

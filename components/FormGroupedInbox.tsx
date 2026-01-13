@@ -272,14 +272,14 @@ export default function FormGroupedInbox({ leads, pageNames }: FormGroupedInboxP
             {/* Content */}
             <div className="flex-1 overflow-y-auto px-6 py-6">
               {/* Scoring Breakdown */}
-              {selectedLead.signals && selectedLead.signals.length > 0 && (
+              {selectedLead.signals && Array.isArray(selectedLead.signals) && selectedLead.signals.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-sm font-medium text-gray-700 mb-3">
                     Score Breakdown
                   </h3>
                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     {selectedLead.signals.map((signal, idx) => (
-                      <div key={idx} className="flex items-start space-x-2">
+                      <div key={`signal-${idx}-${signal.type}`} className="flex items-start space-x-2">
                         <span className="text-green-600 font-bold">✓</span>
                         <div className="flex-1">
                           <p className="text-sm text-gray-900">{signal.description}</p>
