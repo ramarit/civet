@@ -26,10 +26,10 @@ export default function FormGroupedInbox({ leads, pageNames }: FormGroupedInboxP
   const forms = useMemo(() => {
     const formMap = new Map<string, { id: string; name: string; intentLevel: string }>();
     leads.forEach((lead) => {
-      if (!formMap.has(lead.form_id)) {
+      if (!formMap.has(lead.form_id) && lead.form && typeof lead.form === 'object') {
         formMap.set(lead.form_id, {
           id: lead.form_id,
-          name: lead.form.name,
+          name: lead.form.name || "Unknown Form",
           intentLevel: lead.form.intent_level || "medium",
         });
       }
@@ -99,10 +99,11 @@ export default function FormGroupedInbox({ leads, pageNames }: FormGroupedInboxP
               className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Forms ({leads.length})</option>
-              {forms.map((form) => {
+              {forms.map((form, formIdx) => {
                 const count = leads.filter((l) => l.form_id === form.id).length;
+                const formKey = typeof form.id === 'string' ? form.id : `form-${formIdx}`;
                 return (
-                  <option key={form.id} value={form.id}>
+                  <option key={formKey} value={form.id}>
                     {form.name} ({count})
                   </option>
                 );
@@ -170,7 +171,7 @@ export default function FormGroupedInbox({ leads, pageNames }: FormGroupedInboxP
               </div>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {filteredLeads.map((lead) => {
+                {filteredLeads.map((lead, leadIdx) => {
                   const contactName = lead.responses?.name || "Anonymous";
                   const contactEmail = lead.responses?.email || "No email";
                   const preview = getMessagePreview(lead.responses || {});
@@ -178,8 +179,11 @@ export default function FormGroupedInbox({ leads, pageNames }: FormGroupedInboxP
 
                   const isHighPriority = lead.priority === "high";
 
+                  // Ensure lead.id is a string, not an object
+                  const leadKey = typeof lead.id === 'string' ? lead.id : `lead-${leadIdx}`;
+
                   return (
-                    <li key={lead.id}>
+                    <li key={leadKey}>
                       <button
                         onClick={() => setSelectedLead(lead)}
                         className={`w-full text-left hover:bg-gray-50 transition-colors ${
@@ -210,7 +214,7 @@ export default function FormGroupedInbox({ leads, pageNames }: FormGroupedInboxP
                               </p>
 
                               <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
-                                <span>{lead.form.name}</span>
+                                <span>{lead.form?.name || "Unknown Form"}</span>
                                 <span>•</span>
                                 <span>from {pageName}</span>
                                 <span>•</span>
@@ -321,7 +325,7 @@ export default function FormGroupedInbox({ leads, pageNames }: FormGroupedInboxP
               {(() => {
                 const commonFields = ["name", "email", "phone", "message"];
                 const otherFields = Object.entries(selectedLead.responses || {}).filter(
-                  ([key]) => !commonFields.includes(key)
+                  ([key, value]) => !commonFields.includes(key) && value !== null && value !== undefined
                 );
 
                 return otherFields.length > 0 ? (
@@ -330,8 +334,8 @@ export default function FormGroupedInbox({ leads, pageNames }: FormGroupedInboxP
                       Additional Information
                     </h3>
                     <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {otherFields.map(([key, value]) => (
-                        <div key={key}>
+                      {otherFields.map(([key, value], idx) => (
+                        <div key={`field-${key}-${idx}`}>
                           <dt className="text-sm font-medium text-gray-500 capitalize">
                             {key.replace(/_/g, " ")}
                           </dt>
@@ -351,8 +355,8 @@ export default function FormGroupedInbox({ leads, pageNames }: FormGroupedInboxP
               <div className="mt-6 border-t border-gray-200 pt-6 bg-blue-50 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Form Context</h3>
                 <p className="text-sm text-gray-600">
-                  This lead came from <span className="font-semibold">{selectedLead.form.name}</span>{" "}
-                  ({selectedLead.form.intent_level?.toUpperCase()} INTENT)
+                  This lead came from <span className="font-semibold">{selectedLead.form?.name || "Unknown Form"}</span>{" "}
+                  ({selectedLead.form?.intent_level?.toUpperCase() || "MEDIUM"} INTENT)
                 </p>
               </div>
             </div>
