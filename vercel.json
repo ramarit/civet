@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd apps/marketing && pnpm install && pnpm build",
+  "devCommand": "cd apps/marketing && pnpm dev",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "outputDirectory": "apps/marketing/.next"
+}

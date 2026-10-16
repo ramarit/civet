@@ -64,7 +64,7 @@ export function LanguageGlobe() {
     }, 1500);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [languages]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

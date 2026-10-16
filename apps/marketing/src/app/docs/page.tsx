@@ -207,7 +207,7 @@ export default function DocsPage() {
             Need help?
           </h2>
           <p className="mt-2 text-gray-600 dark:text-gray-300">
-            Can't find what you're looking for? Our team is here to help.
+            Can&apos;t find what you&apos;re looking for? Our team is here to help.
           </p>
           <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
             <Link

@@ -60,7 +60,7 @@ export function PricingCalculator({
     <div className="w-full max-w-5xl mx-auto">
       <div className="text-center mb-12">
         <h3 className="text-3xl md:text-4xl font-bold text-warm-900 mb-4">
-          See How Much You'll Save
+          See How Much You&apos;ll Save
         </h3>
         <p className="text-xl text-warm-600">
           Calculate your costs with Civet vs. competitors
@@ -232,7 +232,7 @@ export function PricingCalculator({
                   ${maxSaving * 12}/year
                 </div>
                 <div className="text-sm text-warm-600 mt-1">
-                  That's {savingsPercentage}% less than {competitorPrices[0].name}
+                  That&apos;s {savingsPercentage}% less than {competitorPrices[0].name}
                 </div>
               </div>
               <div className="text-6xl">💰</div>
