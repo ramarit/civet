@@ -1,0 +1,38 @@
+{
+  "name": "@civet/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared configuration files for Civet",
+  "main": "./index.js",
+  "types": "./index.ts",
+  "exports": {
+    "./eslint": "./eslint/index.mjs",
+    "./typescript/*": "./typescript/*.json",
+    "./tailwind": "./tailwind/index.js"
+  },
+  "files": [
+    "eslint",
+    "typescript",
+    "tailwind",
+    "index.js"
+  ],
+  "scripts": {
+    "lint": "echo 'No linting needed for config package'",
+    "type-check": "echo 'No type-checking needed for config package'"
+  },
+  "devDependencies": {
+    "@types/eslint": "^9.6.1",
+    "@types/node": "^20.17.10",
+    "eslint": "^9.18.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "tailwindcss": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

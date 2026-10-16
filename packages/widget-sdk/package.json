@@ -1,0 +1,38 @@
+{
+  "name": "@civet/widget-sdk",
+  "version": "1.0.0",
+  "description": "Production-ready JavaScript widget SDK for Civet translation platform",
+  "main": "dist/civet.js",
+  "module": "dist/civet.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:iife && npm run build:types",
+    "build:esm": "esbuild src/index.ts --bundle --format=esm --outfile=dist/civet.esm.js --minify --sourcemap --target=es2020",
+    "build:iife": "esbuild src/index.ts --bundle --format=iife --global-name=CivetWidget --outfile=dist/civet.js --minify --sourcemap --target=es2015",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist",
+    "dev": "esbuild src/index.ts --bundle --format=iife --global-name=CivetWidget --outfile=dist/civet.js --sourcemap --watch",
+    "analyze": "esbuild src/index.ts --bundle --format=iife --metafile=meta.json --analyze",
+    "test": "echo \"Tests not yet implemented\" && exit 0"
+  },
+  "keywords": [
+    "translation",
+    "i18n",
+    "internationalization",
+    "widget",
+    "localization"
+  ],
+  "author": "Civet",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.19.0",
+    "typescript": "^5.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/civet/civet.git",
+    "directory": "packages/widget-sdk"
+  }
+}

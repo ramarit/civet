@@ -1,0 +1,33 @@
+{
+  "title": "User profile page crashes when loading large image",
+  "description": "When a user uploads a profile picture larger than 5MB, the profile page crashes with a white screen. This affects both desktop and mobile users. The error appears to be related to image processing in the frontend.",
+  "stepsToReproduce": [
+    "Log in to the application",
+    "Navigate to user profile settings",
+    "Upload an image larger than 5MB as profile picture",
+    "Click save",
+    "Navigate to profile page",
+    "Page crashes with white screen"
+  ],
+  "expectedBehavior": "Profile page should load successfully with the uploaded image, possibly after resizing or compressing it automatically",
+  "actualBehavior": "Page shows white screen and browser console shows 'Maximum call stack size exceeded' error",
+  "environment": {
+    "browser": "Chrome 120.0.6099.109",
+    "os": "macOS 14.1",
+    "version": "2.3.1",
+    "deviceType": "desktop"
+  },
+  "customerEmail": "jane.smith@example.com",
+  "customerName": "Jane Smith",
+  "severity": "high",
+  "attachments": [
+    "screenshot-error.png",
+    "browser-console.log"
+  ],
+  "additionalContext": {
+    "userId": "user_12345",
+    "imageSize": "6.2MB",
+    "imageFormat": "PNG",
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
+}

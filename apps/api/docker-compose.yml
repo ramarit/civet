@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://civet:civet_password@db:5432/civet
+      JWT_SECRET: ${JWT_SECRET:-change-this-super-secret-jwt-key-min-32-characters}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-this-super-secret-refresh-key-min-32-chars}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+      RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-60000}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - civet-network
+
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: civet
+      POSTGRES_PASSWORD: civet_password
+      POSTGRES_DB: civet
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - civet-network
+
+volumes:
+  postgres_data:
+
+networks:
+  civet-network:
+    driver: bridge
